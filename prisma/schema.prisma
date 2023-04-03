@@ -49,6 +49,14 @@ model Log {
   User      User     @relation(fields: [ownerId], references: [id])
 }
 
+model Mapping {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar
+  createdAt DateTime @db.Timestamp(6)
+  ownerId   Int
+  User      User     @relation(fields: [ownerId], references: [id])
+}
+
 model User {
   id       Int       @id @default(autoincrement())
   username String    @unique @db.VarChar
@@ -56,4 +64,5 @@ model User {
   Contact  Contact[]
   Import   Import[]
   Log      Log[]
+  Mapping  Mapping[]
 }

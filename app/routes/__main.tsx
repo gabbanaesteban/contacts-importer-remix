@@ -30,19 +30,19 @@ export default function Layout() {
             </button>
             <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
               <div className="navbar-nav ms-auto">
-                <NavLink className="nav-link" to="/">
+                <NavLink className="nav-link" prefetch="intent" to="/">
                   Contacts
                 </NavLink>
-                <NavLink className="nav-link text-decoration-none" to="/logs">
+                <NavLink className="nav-link" prefetch="intent" to="/logs">
                   Logs
                 </NavLink>
-                <NavLink className="nav-link  text-decoration-none" to="/imports">
+                <NavLink className="nav-link" prefetch="intent" to="/imports">
                   Imports
                 </NavLink>
-                <NavLink className="nav-link  text-decoration-none" to="/imports/new">
+                <NavLink className="nav-link" prefetch="intent" to="/new-import">
                   New Import
                 </NavLink>
-                <NavLink className="nav-link  text-decoration-none text-danger" to="/logout">
+                <NavLink className="nav-link text-danger" to="/logout">
                   Log Out
                 </NavLink>
               </div>

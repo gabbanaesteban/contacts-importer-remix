@@ -43,6 +43,16 @@ CREATE TABLE "Log" (
 );
 
 -- CreateTable
+CREATE TABLE "Mapping" (
+    "id" SERIAL NOT NULL,
+    "name" VARCHAR NOT NULL,
+    "createdAt" TIMESTAMP(6) NOT NULL,
+    "ownerId" INTEGER NOT NULL,
+
+    CONSTRAINT "Mapping_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "username" VARCHAR NOT NULL,
@@ -68,3 +78,6 @@ ALTER TABLE "Log" ADD CONSTRAINT "Log_importId_fkey" FOREIGN KEY ("importId") RE
 
 -- AddForeignKey
 ALTER TABLE "Log" ADD CONSTRAINT "Log_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Mapping" ADD CONSTRAINT "Mapping_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

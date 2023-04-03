@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client"
 import type { LoaderArgs } from "@remix-run/node"
-import { Link, useLoaderData } from "@remix-run/react"
+import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"
 import { DB_CLIENT } from "~/ioC/constant"
@@ -39,24 +39,21 @@ export async function loader({ request }: LoaderArgs) {
   return {
     imports: items,
     pagination: {
-      limit,
       hasMore,
-      page,
-      filters: { limit },
+      filters: { limit, page },
     },
   }
 }
 
 export default function Imports() {
-  const { imports, pagination } = useLoaderData<typeof loader>()
-  const { limit, filters, page, hasMore } = pagination
+  const { imports, pagination: { filters, hasMore } } = useLoaderData<typeof loader>()
   const { title, description } = meta()
 
   return (
     <>
       <PageHeader title={title} description={description} />
 
-      <Pagination showing={limit} page={page} hasMore={hasMore} filters={filters} />
+      <Pagination hasMore={hasMore} filters={filters} />
 
       <div className="table-responsive">
         <table className="table">
@@ -78,9 +75,9 @@ export default function Imports() {
                 <td>{imp._count.Log}</td>
                 <td>
                   {imp._count.Log ? (
-                    <Link prefetch="intent" to={`/logs?importId=${imp.id}`}>
+                    <a href={`/logs?importId=${imp.id}`}>
                       View
-                    </Link>
+                    </a>
                   ) : null}
                 </td>
               </tr>
@@ -88,8 +85,6 @@ export default function Imports() {
           </tbody>
         </table>
       </div>
-
-      <Pagination showing={limit} page={page} hasMore={hasMore} filters={filters} />
     </>
   )
 }

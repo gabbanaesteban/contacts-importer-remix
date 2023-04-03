@@ -30,24 +30,21 @@ export async function loader({ request }: LoaderArgs) {
   return {
     contacts: items,
     pagination: {
-      limit,
       hasMore,
-      page,
-      filters: { limit },
+      filters: { limit, page },
     },
   }
 }
 
 export default function Contacts() {
-  const { contacts, pagination } = useLoaderData<typeof loader>()
-  const { limit, filters, page, hasMore } = pagination
+  const { contacts, pagination: { filters, hasMore } } = useLoaderData<typeof loader>()
   const { title, description } = meta()
 
   return (
     <>
       <PageHeader title={title} description={description} />
 
-      <Pagination showing={limit} page={page} hasMore={hasMore} filters={filters} />
+      <Pagination hasMore={hasMore} filters={filters} />
 
       <div className="table-responsive">
         <table className="table text-center">
@@ -81,8 +78,6 @@ export default function Contacts() {
           </tbody>
         </table>
       </div>
-
-      <Pagination showing={limit} page={page} hasMore={hasMore} filters={filters} />
     </>
   )
 }

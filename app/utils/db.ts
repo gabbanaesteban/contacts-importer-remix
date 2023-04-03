@@ -7,7 +7,7 @@ declare global {
   var __prisma: ReturnType<typeof getClient> | undefined
 }
 
-const logThreshold = process.env.NODE_ENV !== 'production' ? 0 : 500
+const logThreshold = 500
 
 const prisma = () => global.__prisma ?? (global.__prisma = getClient())
 

@@ -1,7 +1,6 @@
 import type { PrismaClient } from "@prisma/client"
 import type { LoaderArgs } from "@remix-run/node"
-import { useLoaderData, useNavigate } from "@remix-run/react"
-import { useEffect, useState } from "react"
+import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"
 import { DB_CLIENT } from "~/ioC/constant"
@@ -37,40 +36,21 @@ export async function loader({ request }: LoaderArgs) {
   return {
     logs: items,
     pagination: {
-      limit,
       hasMore,
-      page,
-      filters: { limit },
+      filters: { limit, page, importId },
     },
   }
 }
 
 export default function Logs() {
-  const { logs, pagination } = useLoaderData<typeof loader>()
-  const { limit, filters, page, hasMore } = pagination
+  const { logs, pagination: { filters, hasMore } } = useLoaderData<typeof loader>()
   const { title, description } = meta()
-
-  const navigate = useNavigate()
-  const [showing, setShowing] = useState(limit)
-
-  const handleOnBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    const value = parseInt(e.target.value, 10)
-    if (value > 0) {
-      setShowing(value)
-    }
-  }
-
-  useEffect(() => {
-    if (showing === limit) return
-    navigate({ search: `?limit=${showing}` })
-  }, [showing, navigate, limit])
 
   return (
     <>
       <PageHeader title={title} description={description} />
 
-      <Pagination showing={showing} onBlur={(e) => handleOnBlur(e)} page={page} hasMore={hasMore} filters={filters} />
+      <Pagination hasMore={hasMore} filters={filters} />
 
       <div className="table-responsive">
         <table className="table text-center">
@@ -98,8 +78,6 @@ export default function Logs() {
           </tbody>
         </table>
       </div>
-
-      <Pagination showing={showing} onBlur={(e) => handleOnBlur(e)} page={page} hasMore={hasMore} filters={filters} />
     </>
   )
 }
