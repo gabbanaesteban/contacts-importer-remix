@@ -1,12 +1,10 @@
-import type { PrismaClient } from "@prisma/client"
-import type { LoaderArgs, LoaderFunction } from "@remix-run/node"
+import type { LoaderArgs } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"
-import { DB_CLIENT } from "~/ioC/constant"
-import container from "~/ioC/inversify.config"
 import { listLogsSchema } from "~/schemas/schemas"
-import { composeSkipAndTakeFromPageAndLimit, searchParamsToObject, validateParams } from "~/utils/helpers"
+import { getLogs } from "~/services/imports-service.server"
+import { searchParamsToObject, validateParams } from "~/utils/helpers"
 
 export function meta() {
   return {
@@ -18,23 +16,11 @@ export function meta() {
 export async function loader({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page, importId } = validateParams(params, listLogsSchema)
-  const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })
 
-  const prisma = container.get<PrismaClient>(DB_CLIENT)
-
-  const logs = await prisma.log.findMany({
-    where: { importId },
-    include: { Import: true },
-    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-    skip,
-    take,
-  })
-
-  const hasMore = logs.length > limit
-  const items = hasMore ? logs.slice(0, -1) : logs
+  const { logs, hasMore } = await getLogs({ limit, page, importId })
 
   return {
-    logs: items,
+    logs,
     pagination: {
       hasMore,
       filters: { limit, page, importId },

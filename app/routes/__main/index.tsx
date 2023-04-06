@@ -1,12 +1,10 @@
-import type { PrismaClient } from "@prisma/client"
 import type { LoaderArgs } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
-import { composeSkipAndTakeFromPageAndLimit, searchParamsToObject, validateParams } from "~/utils/helpers"
+import { searchParamsToObject, validateParams } from "~/utils/helpers"
 import { listContactsSchema } from "~/schemas/schemas"
 import Pagination from "~/components/Pagination"
-import container from "~/ioC/inversify.config"
-import { DB_CLIENT } from "~/ioC/constant"
 import PageHeader from "~/components/PageHeader"
+import { getContacts } from "~/services/contacts-service.server"
 
 export function meta() {
   return {
@@ -18,17 +16,11 @@ export function meta() {
 export async function loader ({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page } = validateParams(params, listContactsSchema)
-  const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })
 
-  const prisma = container.get<PrismaClient>(DB_CLIENT)
-
-  const contacts = await prisma.contact.findMany({ skip, take })
-
-  const hasMore = contacts.length > limit
-  const items = hasMore ? contacts.slice(0, -1) : contacts
+  const { contacts, hasMore } = await getContacts({ limit, page })
 
   return {
-    contacts: items,
+    contacts,
     pagination: {
       hasMore,
       filters: { limit, page },

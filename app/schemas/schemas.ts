@@ -2,7 +2,6 @@ import { NodeOnDiskFile } from "@remix-run/node";
 import { parse } from "date-fns";
 import z from "zod"
 
-// pagination
 const limitSchema = z.preprocess((value) => parseInt(z.string().default('5').parse(value), 10), z.number().min(1).max(100));
 const pageSchema = z.preprocess((value) => parseInt(z.string().default('1').parse(value), 10), z.number().min(1));
 const entityIdSchema = z.preprocess((value) => parseInt(z.string().parse(value), 10), z.number().min(1))

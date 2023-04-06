@@ -1,4 +1,4 @@
-import type { PageAndLimit, Paginated } from "~/types"
+import type { PageAndLimit } from "~/types"
 import type { z } from "zod"
 import { badRequest } from "remix-utils"
 
@@ -28,16 +28,6 @@ export function composeSkipAndTakeFromPageAndLimit({ page, limit } : PageAndLimi
   return {
     skip: (page - 1) * limit,
     take: limit + 1,
-  }
-}
-
-export function paginateResults<Type>(result: Type[], { page, limit }: PageAndLimit): Paginated<Type> {
-  const hasMore = result.length > limit
-  const items = hasMore ? result.slice(0, -1) : result
-  return { 
-    items,
-    nextPage: hasMore ? page + 1 : undefined,
-    prevPage: page > 1 ? page - 1 : undefined,
   }
 }
 

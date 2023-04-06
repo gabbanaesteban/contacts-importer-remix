@@ -1,7 +1,6 @@
 import type { CSVHeadersHook } from "~/utils/useCSVHeaders"
-import type { PrismaClient } from "@prisma/client"
 import type { ActionFunction } from "@remix-run/node"
-import type { MappingMap } from "~/types";
+import type { MappingMap } from "~/types"
 import { redirect } from "@remix-run/node"
 import { useCSVHeaders } from "~/utils/useCSVHeaders"
 import MappingSelect from "~/components/MappingSelect"
@@ -14,12 +13,11 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/node"
 import { Form, useLoaderData } from "@remix-run/react"
-import { swapObjectProps, validateParams } from "~/utils/helpers"
+import { validateParams } from "~/utils/helpers"
 import { addImportSchema } from "~/schemas/schemas"
-import container from "~/ioC/inversify.config"
-import { DB_CLIENT } from "~/ioC/constant"
 import { nanoid } from "nanoid"
-import { ImportStatus } from "~/types"
+import env from "~/env"
+import { createImport, createMapping, getMappings } from "~/services/imports-service.server"
 
 export function meta() {
   return {
@@ -33,7 +31,7 @@ function getUploadHandler() {
     unstable_createFileUploadHandler({
       maxPartSize: 10_000_000, //10 MB
       file: ({ filename }) => `${nanoid()}*${filename}`,
-      directory: "uploads",
+      directory: env.UPLOADS_DIR,
       // We don't want to save the file if it's not a csv
       filter: (file) => file.contentType === "text/csv",
     }),
@@ -46,41 +44,17 @@ function getUploadHandler() {
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await unstable_parseMultipartFormData(request, getUploadHandler())
+
   const params = Object.fromEntries(formData.entries())
   const { file, mapping_name: mappingName, ...mapping } = validateParams(params, addImportSchema)
 
-  const promises = []
-  const prisma = container.get<PrismaClient>(DB_CLIENT)
-
-  if (mappingName) {
-    promises.push(
-      prisma.mapping.create({
-        data: { ownerId: 1, name: mappingName, map: mapping, createdAt: new Date() },
-      })
-    )
-  }
-
-  promises.push(
-    prisma.import.create({
-      data: {
-        filePath: `${process.env.UPLOADS_DIR}/${file.name}`,
-        originalName: file.name.split("*").pop() ?? "",
-        mapping: swapObjectProps(mapping),
-        status: ImportStatus.ON_HOLD,
-        userId: 1,
-        createdAt: new Date(),
-      },
-    })
-  )
-
-  await Promise.all(promises)
+  await Promise.all([createImport(file, mapping), mappingName && createMapping(mappingName, mapping)])
 
   return redirect("/imports")
 }
 
 export async function loader() {
-  const prisma = container.get<PrismaClient>(DB_CLIENT)
-  const mappings = await prisma.mapping.findMany({ where: { ownerId: 1 } })
+  const mappings = await getMappings()
 
   return {
     mappings,
@@ -97,8 +71,7 @@ export default function NewImport() {
   const handleMappingSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const mappingId = parseInt(event.target.value)
     const mapping = mappings.find((map) => map.id === mappingId)
-    console.log(mapping?.map)
-    setSelectedMapping(mapping?.map as MappingMap ?? null)
+    setSelectedMapping((mapping?.map as MappingMap) ?? null)
   }
 
   useEffect(() => {
@@ -106,7 +79,6 @@ export default function NewImport() {
       setSelectedMapping(null)
     }
   }, [headers])
-
 
   return (
     <>
@@ -145,13 +117,18 @@ export default function NewImport() {
         </div>
 
         <div className="row">
-          <MappingSelect options={headers} mapping={selectedMapping} name="name" label="Name"/>
+          <MappingSelect options={headers} mapping={selectedMapping} name="name" label="Name" />
           <MappingSelect options={headers} mapping={selectedMapping} name="date_of_birth" label="Date of Birth" />
           <MappingSelect options={headers} mapping={selectedMapping} name="phone" label="Phone" />
         </div>
         <div className="row">
           <MappingSelect options={headers} mapping={selectedMapping} name="address" label="Address" />
-          <MappingSelect options={headers} mapping={selectedMapping} name="credit_card_number" label="Credit Card Number" />
+          <MappingSelect
+            options={headers}
+            mapping={selectedMapping}
+            name="credit_card_number"
+            label="Credit Card Number"
+          />
           <MappingSelect options={headers} mapping={selectedMapping} name="email" label="Email" />
         </div>
 

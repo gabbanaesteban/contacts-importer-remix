@@ -1,7 +1,7 @@
 import '@abraham/reflection'
 import { Container } from 'inversify'
-import { DB_CLIENT } from '~/ioC/constant'
-import prisma from '~/utils/db'
+import { DB_CLIENT } from '~/ioC/constant.server'
+import prisma from '~/utils/db.server'
 import type { PrismaClient } from '@prisma/client'
 
 

@@ -1,13 +1,10 @@
-import type { PrismaClient } from "@prisma/client"
 import type { LoaderArgs } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"
-import { DB_CLIENT } from "~/ioC/constant"
-import container from "~/ioC/inversify.config"
 import { listImportsSchema } from "~/schemas/schemas"
+import { getImports } from "~/services/imports-service.server"
 import {
-  composeSkipAndTakeFromPageAndLimit,
   searchParamsToObject,
   validateParams,
 } from "~/utils/helpers"
@@ -22,22 +19,11 @@ export function meta() {
 export async function loader({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page } = validateParams(params, listImportsSchema)
-  const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })
 
-  const prisma = container.get<PrismaClient>(DB_CLIENT)
-
-  const imports = await prisma.import.findMany({
-    // where: { userId: this.user.id },
-    include: { _count: { select: { Log: true } } },
-    skip,
-    take,
-  })
-
-  const hasMore = imports.length > limit
-  const items = hasMore ? imports.slice(0, -1) : imports
+  const { imports, hasMore } = await getImports({ limit, page })
 
   return {
-    imports: items,
+    imports,
     pagination: {
       hasMore,
       filters: { limit, page },
