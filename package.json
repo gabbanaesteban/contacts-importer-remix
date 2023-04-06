@@ -23,6 +23,7 @@
     "date-fns": "^2.29.3",
     "inversify": "^6.0.1",
     "isbot": "^3.6.5",
+    "nanoid": "^4.0.2",
     "papaparse": "^5.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

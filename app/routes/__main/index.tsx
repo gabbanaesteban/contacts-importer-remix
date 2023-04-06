@@ -15,7 +15,7 @@ export function meta() {
   }
 }
 
-export async function loader({ request }: LoaderArgs) {
+export async function loader ({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page } = validateParams(params, listContactsSchema)
   const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })

@@ -1,3 +1,4 @@
+import { NodeOnDiskFile } from "@remix-run/node";
 import { parse } from "date-fns";
 import z from "zod"
 
@@ -53,4 +54,18 @@ export const listContactsSchema = z.object({
 export const listImportsSchema = z.object({
   limit: limitSchema,
   page: pageSchema,
+})
+
+export const mappingMap = z.object({
+  name: z.string().nonempty(),
+  date_of_birth: z.string().nonempty(),
+  phone: z.string().nonempty(),
+  address: z.string().nonempty(),
+  credit_card_number: z.string().nonempty(),
+  email: z.string().nonempty(),
+})
+
+export const addImportSchema = mappingMap.extend({
+  file: z.instanceof(NodeOnDiskFile),
+  mapping_name: z.string().nonempty().optional(),
 })

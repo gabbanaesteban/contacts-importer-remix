@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client"
-import type { LoaderArgs } from "@remix-run/node"
+import type { LoaderArgs, LoaderFunction } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"

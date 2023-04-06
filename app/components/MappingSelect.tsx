@@ -1,19 +1,25 @@
+import type{ SelectHTMLAttributes } from "react";
+
+interface MappingSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  options: string[];
+  name: string;
+  label: string;
+  mapping: Record<string, string> | null;
+}
 export default function MappingSelect({
-  headers,
+  options,
   name,
   label,
-}: {
-  headers: string[]
-  name: string
-  label: string
-}) {
+  mapping,
+  ...props
+}: MappingSelectProps) {
   return (
     <div className="col-md-4 mb-3">
       <div className="form-floating">
-        <select className="form-select" name={name} disabled={!headers.length} required>
-          {headers.map((header, index) => (
-            <option key={header + index} value={header}>
-              {header}
+        <select className="form-select" value={mapping?.[name]} name={name} disabled={!options.length} {...props} required>
+          {options.map((option, index) => (
+            <option key={option + index} value={option}>
+              {option}
             </option>
           ))}
         </select>

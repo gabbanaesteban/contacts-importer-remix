@@ -8,7 +8,10 @@ export function useCSVHeaders(): CSVHeadersHook {
 
   const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || file.type !== 'text/csv') return;
+    if (!file || file.type !== 'text/csv'){
+      setHeaders([]);
+      return;
+    }
 
     const reader = new FileReader();
     reader.addEventListener('load', (event) => {
