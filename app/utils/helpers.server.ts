@@ -1,5 +1,6 @@
 import type { PageAndLimit } from "~/types"
 import type { z } from "zod"
+import bcrypt from "bcrypt";
 import { badRequest } from "remix-utils"
 
 
@@ -33,4 +34,12 @@ export function composeSkipAndTakeFromPageAndLimit({ page, limit } : PageAndLimi
 
 export function searchParamsToObject(searchParams: URLSearchParams) {
   return Object.fromEntries(searchParams.entries())
+}
+
+export function hashPassword(password: string) {
+  return bcrypt.hash(password, 10)
+}
+
+export function comparePassword(password: string, hash: string) {
+  return bcrypt.compare(password, hash)
 }
