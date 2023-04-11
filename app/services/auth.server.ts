@@ -3,7 +3,8 @@ import { Authenticator } from "remix-auth"
 import { sessionStorage } from "~/services/session.server"
 import { FormStrategy } from "remix-auth-form"
 import { findOrCreateUser } from "./user.server"
-import { comparePassword } from "~/utils/helpers"
+import bcrypt from "bcrypt";
+
 
 export const authenticator = new Authenticator<User>(sessionStorage)
 
@@ -16,7 +17,7 @@ authenticator.use(
 
     const user = await findOrCreateUser(username, password)
 
-    const result = await comparePassword(password, user.password)
+    const result = await bcrypt.compare(password, user.password)
 
     if (!result) {
       throw new Error("Invalid password")

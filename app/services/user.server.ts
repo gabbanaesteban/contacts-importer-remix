@@ -1,8 +1,8 @@
-import { hashPassword } from "~/utils/helpers"
+import bcrypt from "bcrypt";
 import prisma from "./prisma.server"
 
 export async function createUser(username: string, password: string) {
-  const hashedPassword = await hashPassword(password)
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   return prisma.user.create({
     data: {
