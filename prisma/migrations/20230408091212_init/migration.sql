@@ -9,8 +9,8 @@ CREATE TABLE "Contact" (
     "creditCardNetwork" VARCHAR NOT NULL,
     "creditCardLast4" VARCHAR NOT NULL,
     "email" VARCHAR NOT NULL,
-    "createdAt" TIMESTAMP(6) NOT NULL,
-    "updatedAt" TIMESTAMP(6) NOT NULL,
+    "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
     "ownerId" INTEGER NOT NULL,
 
     CONSTRAINT "Contact_pkey" PRIMARY KEY ("id")
@@ -24,7 +24,7 @@ CREATE TABLE "Import" (
     "mapping" JSON NOT NULL,
     "status" VARCHAR NOT NULL,
     "userId" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(6) NOT NULL,
+    "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Import_pkey" PRIMARY KEY ("id")
 );
@@ -37,7 +37,7 @@ CREATE TABLE "Log" (
     "rowData" JSON NOT NULL,
     "rowNumber" INTEGER NOT NULL,
     "error" VARCHAR NOT NULL,
-    "createdAt" TIMESTAMP(6) NOT NULL,
+    "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Log_pkey" PRIMARY KEY ("id")
 );
@@ -46,7 +46,8 @@ CREATE TABLE "Log" (
 CREATE TABLE "Mapping" (
     "id" SERIAL NOT NULL,
     "name" VARCHAR NOT NULL,
-    "createdAt" TIMESTAMP(6) NOT NULL,
+    "map" JSON NOT NULL,
+    "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
     "ownerId" INTEGER NOT NULL,
 
     CONSTRAINT "Mapping_pkey" PRIMARY KEY ("id")
@@ -57,6 +58,7 @@ CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "username" VARCHAR NOT NULL,
     "password" VARCHAR NOT NULL,
+    "createdAt" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

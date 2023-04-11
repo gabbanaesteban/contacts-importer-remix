@@ -17,8 +17,8 @@ model Contact {
   creditCardNetwork String   @db.VarChar
   creditCardLast4   String   @db.VarChar
   email             String   @db.VarChar
-  createdAt         DateTime @db.Timestamp(6)
-  updatedAt         DateTime @db.Timestamp(6)
+  createdAt         DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime? @default(now()) @db.Timestamp(6)
   ownerId           Int
   User              User     @relation(fields: [ownerId], references: [id])
 
@@ -34,7 +34,7 @@ model Import {
   userId       Int
   Log          Log[]
   User         User     @relation(fields: [userId], references: [id])
-  createdAt    DateTime @db.Timestamp(6)
+  createdAt    DateTime? @default(now()) @db.Timestamp(6)
 }
 
 model Log {
@@ -44,7 +44,7 @@ model Log {
   rowData   Json     @db.Json
   rowNumber Int
   error     String   @db.VarChar
-  createdAt DateTime @db.Timestamp(6)
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
   Import    Import   @relation(fields: [importId], references: [id])
   User      User     @relation(fields: [ownerId], references: [id])
 }
@@ -53,17 +53,18 @@ model Mapping {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar
   map       Json     @db.Json
-  createdAt DateTime @db.Timestamp(6)
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
   ownerId   Int
   User      User     @relation(fields: [ownerId], references: [id])
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  username String    @unique @db.VarChar
-  password String    @db.VarChar
-  Contact  Contact[]
-  Import   Import[]
-  Log      Log[]
-  Mapping  Mapping[]
+  id        Int       @id @default(autoincrement())
+  username  String    @unique @db.VarChar
+  password  String    @db.VarChar
+  createdAt DateTime?  @default(now()) @db.Timestamp(6)
+  Contact   Contact[]
+  Import    Import[]
+  Log       Log[]
+  Mapping   Mapping[]
 }

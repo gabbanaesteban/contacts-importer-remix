@@ -4,11 +4,11 @@ const prisma = new PrismaClient()
 
 async function main() {
   await prisma.user.upsert({
-    where: { username: "koombea" },
+    where: { username: "gabbanaesteban" },
     update: {},
     create: {
-      username: "koombea",
-      password: "$2b$10$/7GWb5qKSp7SO6uBSXaHw.NNZWpzft1EL0WWLLzhUXCNqLuULEK2W", //123456
+      username: "gabbanaesteban",
+      password: "$2b$10$BTPChL6OTPw8krJr4TI/5.CcOqnyP6mlzWILiVaO7R8.7iW8t1Rg6", //123456
     },
   })
 }
@@ -17,7 +17,7 @@ try {
   await main()
   await prisma.$disconnect()
 } catch (error) {
-  console.error(e)
+  console.error(error)
   await prisma.$disconnect()
   process.exit(1)
 }
