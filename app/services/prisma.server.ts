@@ -9,7 +9,7 @@ declare global {
 
 const logThreshold = 500
 
-const prisma = () => global.__prisma ?? (global.__prisma = getClient())
+const prisma =  global.__prisma ?? (global.__prisma = getClient())
 
 function getClient(): PrismaClient {
   // NOTE: during development if you change anything in this function, remember

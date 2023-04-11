@@ -14,7 +14,6 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@abraham/reflection": "^0.12.0",
     "@prisma/client": "^4.12.0",
     "@remix-run/node": "^1.14.3",
     "@remix-run/react": "^1.14.3",
@@ -22,7 +21,6 @@
     "bcrypt": "^5.1.0",
     "chalk": "^5.2.0",
     "date-fns": "^2.29.3",
-    "inversify": "^6.0.1",
     "isbot": "^3.6.5",
     "nanoid": "^4.0.2",
     "papaparse": "^5.4.1",

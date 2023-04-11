@@ -1,8 +1,10 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { Form, Link } from "@remix-run/react"
 import Logo from "~/components/Logo"
+import { authSchema } from "~/schemas/schemas";
 import { authenticator } from "~/services/auth.server";
 import authStyles from "~/styles/auth.css"
+import { validateParams } from "~/utils/helpers";
 
 export function links() {
   return [{ rel: "stylesheet", href: authStyles }]
@@ -15,9 +17,13 @@ export async function loader({ request }: LoaderArgs) {
 };
 
 export async function action({ request }: ActionArgs) {
+  const formData = await request.formData();
+  validateParams(Object.fromEntries(formData.entries()), authSchema)
+  
   return await authenticator.authenticate("user-pass", request, {
     successRedirect: "/",
     failureRedirect: "/login",
+    context: { formData },
   });
 };
 

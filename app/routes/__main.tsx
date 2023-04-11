@@ -1,13 +1,5 @@
-import type { LoaderArgs } from "@remix-run/node";
 import { Form, Link, NavLink, Outlet } from "@remix-run/react"
 import Logo from "~/components/Logo"
-import { authenticator } from "~/services/auth.server";
-
-export async function loader({ request }: LoaderArgs) {
-  return await authenticator.isAuthenticated(request, {
-    failureRedirect: "/login",
-  });
-}
 
 export default function Layout() {
   return (

@@ -3,8 +3,10 @@ import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"
 import { listImportsSchema } from "~/schemas/schemas"
-import { getImports } from "~/services/imports-service.server"
+import { authenticator } from "~/services/auth.server"
+import prisma from "~/services/prisma.server"
 import {
+  composeSkipAndTakeFromPageAndLimit,
   searchParamsToObject,
   validateParams,
 } from "~/utils/helpers"
@@ -19,11 +21,24 @@ export function meta() {
 export async function loader({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page } = validateParams(params, listImportsSchema)
+  const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })
 
-  const { imports, hasMore } = await getImports({ limit, page })
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  })
+
+  const imports = await prisma.import.findMany({
+    where: { userId: user.id },
+    include: { _count: { select: { Log: true } } },
+    skip,
+    take,
+  })
+
+  const hasMore = imports.length > limit
+  const items = hasMore ? imports.slice(0, -1) : imports
 
   return {
-    imports,
+    imports: items,
     pagination: {
       hasMore,
       filters: { limit, page },

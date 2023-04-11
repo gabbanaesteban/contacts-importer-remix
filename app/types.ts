@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { contactSchema, importMappingSchema, mappingMap } from "~/schemas/schemas";
+import type { authSchema, contactSchema, importMappingSchema, mappingMap } from "~/schemas/schemas";
 
 export enum ImportStatus {
   ON_HOLD = 'On Hold',
@@ -16,3 +16,4 @@ export type PageAndLimit = {
 export type ImportMappingType = z.infer<typeof importMappingSchema>;
 export type ContactPayloadType = z.infer<typeof contactSchema>;
 export type MappingMap = z.infer<typeof mappingMap>;
+export type AuthPayload = z.infer<typeof authSchema>;

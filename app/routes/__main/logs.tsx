@@ -3,8 +3,9 @@ import { useLoaderData } from "@remix-run/react"
 import PageHeader from "~/components/PageHeader"
 import Pagination from "~/components/Pagination"
 import { listLogsSchema } from "~/schemas/schemas"
-import { getLogs } from "~/services/imports-service.server"
-import { searchParamsToObject, validateParams } from "~/utils/helpers"
+import { authenticator } from "~/services/auth.server"
+import prisma from "~/services/prisma.server"
+import { composeSkipAndTakeFromPageAndLimit, searchParamsToObject, validateParams } from "~/utils/helpers"
 
 export function meta() {
   return {
@@ -16,11 +17,25 @@ export function meta() {
 export async function loader({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page, importId } = validateParams(params, listLogsSchema)
+  const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })
 
-  const { logs, hasMore } = await getLogs({ limit, page, importId })
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  })
+
+  const logs = await prisma.log.findMany({
+    where: { importId, ownerId: user.id },
+    include: { Import: true },
+    orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+    skip,
+    take,
+  })
+
+  const hasMore = logs.length > limit
+  const items = hasMore ? logs.slice(0, -1) : logs
 
   return {
-    logs,
+    logs: items,
     pagination: {
       hasMore,
       filters: { limit, page, importId },
@@ -29,7 +44,10 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export default function Logs() {
-  const { logs, pagination: { filters, hasMore } } = useLoaderData<typeof loader>()
+  const {
+    logs,
+    pagination: { filters, hasMore },
+  } = useLoaderData<typeof loader>()
   const { title, description } = meta()
 
   return (

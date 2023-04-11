@@ -1,10 +1,11 @@
 import type { LoaderArgs } from "@remix-run/node"
 import { useLoaderData } from "@remix-run/react"
-import { searchParamsToObject, validateParams } from "~/utils/helpers"
+import { composeSkipAndTakeFromPageAndLimit, searchParamsToObject, validateParams } from "~/utils/helpers"
 import { listContactsSchema } from "~/schemas/schemas"
 import Pagination from "~/components/Pagination"
 import PageHeader from "~/components/PageHeader"
-import { getContacts } from "~/services/contacts-service.server"
+import prisma from "~/services/prisma.server"
+import { authenticator } from "~/services/auth.server"
 
 export function meta() {
   return {
@@ -16,11 +17,23 @@ export function meta() {
 export async function loader ({ request }: LoaderArgs) {
   const params = searchParamsToObject(new URL(request.url).searchParams)
   const { limit, page } = validateParams(params, listContactsSchema)
+  const { skip, take } = composeSkipAndTakeFromPageAndLimit({ page, limit })
 
-  const { contacts, hasMore } = await getContacts({ limit, page })
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  })
+
+  const contacts = await prisma.contact.findMany({
+    where: { ownerId: user.id },
+    skip,
+    take,
+  }) 
+
+  const hasMore = contacts.length > limit
+  const items = hasMore ? contacts.slice(0, -1) : contacts
 
   return {
-    contacts,
+    contacts: items,
     pagination: {
       hasMore,
       filters: { limit, page },

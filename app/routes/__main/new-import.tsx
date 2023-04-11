@@ -1,6 +1,7 @@
 import type { CSVHeadersHook } from "~/utils/useCSVHeaders"
-import type { ActionFunction } from "@remix-run/node"
-import type { MappingMap } from "~/types"
+import type { ActionFunction, LoaderArgs } from "@remix-run/node"
+import type { MappingMap } from "~/types";
+import { ImportStatus } from "~/types"
 import { redirect } from "@remix-run/node"
 import { useCSVHeaders } from "~/utils/useCSVHeaders"
 import MappingSelect from "~/components/MappingSelect"
@@ -13,11 +14,12 @@ import {
   unstable_parseMultipartFormData,
 } from "@remix-run/node"
 import { Form, useLoaderData } from "@remix-run/react"
-import { validateParams } from "~/utils/helpers"
+import { swapObjectProps, validateParams } from "~/utils/helpers"
 import { addImportSchema } from "~/schemas/schemas"
 import { nanoid } from "nanoid"
 import env from "~/env"
-import { createImport, createMapping, getMappings } from "~/services/imports-service.server"
+import { authenticator } from "~/services/auth.server"
+import prisma from "~/services/prisma.server"
 
 export function meta() {
   return {
@@ -42,23 +44,53 @@ function getUploadHandler() {
   )
 }
 
+export async function loader({ request }: LoaderArgs) {
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  })
+
+  return {
+    mappings: await prisma.mapping.findMany({ where: { ownerId: user.id } }),
+  }
+}
+
 export const action: ActionFunction = async ({ request }) => {
+  await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  })
+
   const formData = await unstable_parseMultipartFormData(request, getUploadHandler())
 
   const params = Object.fromEntries(formData.entries())
   const { file, mapping_name: mappingName, ...mapping } = validateParams(params, addImportSchema)
 
-  await Promise.all([createImport(file, mapping), mappingName && createMapping(mappingName, mapping)])
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  })
+
+  const promises: Promise<any>[] = [
+    prisma.import.create({
+      data: {
+        filePath: `${env.UPLOADS_DIR}/${file.name}`,
+        originalName: file.name.split("*").pop() ?? "",
+        mapping: swapObjectProps(mapping),
+        status: ImportStatus.ON_HOLD,
+        userId: user.id,
+      },
+    }),
+  ]
+
+  if (mappingName) {
+    promises.push(
+      prisma.mapping.create({
+        data: { ownerId: user.id, name: mappingName, map: mapping },
+      })
+    )
+  }
+
+  await Promise.allSettled(promises)
 
   return redirect("/imports")
-}
-
-export async function loader() {
-  const mappings = await getMappings()
-
-  return {
-    mappings,
-  }
 }
 
 export default function NewImport() {

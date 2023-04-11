@@ -3,22 +3,23 @@ import { Authenticator } from "remix-auth"
 import { sessionStorage } from "~/services/session.server"
 import { FormStrategy } from "remix-auth-form"
 import { findOrCreateUser } from "./user.server"
-import { comparePassword } from "~/utils/helpers.server"
-import { unauthorized } from "remix-utils"
+import { comparePassword } from "~/utils/helpers"
 
 export const authenticator = new Authenticator<User>(sessionStorage)
 
 authenticator.use(
-  new FormStrategy(async ({ form }) => {
-    const username = form.get("username") as string
-    const password = form.get("password") as string
+  new FormStrategy(async ({ context }) => {
+    const { formData } = context as { formData: FormData }
+
+    const username = formData.get("username") as string
+    const password = formData.get("password") as string
 
     const user = await findOrCreateUser(username, password)
 
     const result = await comparePassword(password, user.password)
 
     if (!result) {
-      throw unauthorized("Invalid password")
+      throw new Error("Invalid password")
     }
 
     return user
