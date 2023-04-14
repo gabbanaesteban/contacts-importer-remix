@@ -37,7 +37,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/bootstrap": "^5.2.6",
     "@types/papaparse": "^5.3.7",
-    "@types/react": "^18.0.25",
+    "@types/react": "^18.0.35",
     "@types/react-dom": "^18.0.8",
     "eslint": "^8.27.0",
     "prisma": "^4.12.0",
